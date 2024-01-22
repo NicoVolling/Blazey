@@ -1,0 +1,50 @@
+﻿@using Blazey.Security.AdminCode
+@inherits BaseComponent
+
+@if (OnSetupPage)
+{
+    <Account_Setup AdminCode="@AdminCode" ReturnUrl="@("/" + NavigationManager.Uri.Replace(NavigationManager.BaseUri, ""))" />
+}
+else
+{
+    <PageContent Title="Initial Setup" TitleCenter Page="this">
+        <p class="fw-bold text-center">Please enter the Admin Code specified in the "appsettings.json".</p>
+        <div class="container-fluid vstack gap-2" style="max-width: 450px;">
+            @if (ErrorMessage.Length > 0)
+            {
+                <div class="alert alert-danger">
+                    @ErrorMessage
+                </div>
+            }
+            <ValidationMaster>
+                <ValidationChild ID="0" IsValid="() => AdminCode?.Length > 0" Class="mb-2">
+                    <TextInput Title="Admin Code" @bind-Value="AdminCode" />
+                </ValidationChild>
+                <ValidationEvaluation ValidationID="-1" InvalidDisable Class="btn btn-outline-success w-100" onclick="(o) => { CheckAdminCode(); }">Submit</ValidationEvaluation>
+            </ValidationMaster>
+        </div>
+    </PageContent>
+}
+
+@code {
+    [Inject]
+    private AdminCodeService adminCodeService { get; set; } = default!;
+
+    private string? AdminCode { get; set; }
+
+    private bool OnSetupPage { get; set; }
+
+    private string ErrorMessage { get; set; } = "";
+
+    private void CheckAdminCode()
+    {
+        if(adminCodeService.Validate(AdminCode ?? ""))
+        {
+            OnSetupPage = true;
+        }
+        else
+        {
+            ErrorMessage = "Invalid AdminCode!";
+        }
+    }
+}

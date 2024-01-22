@@ -1,0 +1,151 @@
+﻿@page "/account/login"
+@page "/account/register"
+@using System.Text;
+
+@inherits BaseComponent
+
+<PageContent Title="@(Register ? "Registrieren" : "Anmelden")" TitleCenter Page="this">
+    <div class="container-fluid" style="max-width: 300px;">
+        @if(message?.Length > 0)
+        {
+            <div class="mb-2 mx-auto">
+                <div class="alert alert-@(Success ? "success" : "danger") text-center p-2">
+                    @message
+                </div>
+            </div>
+        }
+        <ValidationMaster>
+            <form class="vstack gap-3" method="post" id="form1" action="@($"/account/api/{(Register ? "register" : "login")}")">
+                @if(!Register)
+                {
+                    <ValidationChild ID="0" IsValid="() => Username?.Length > 0">
+                        <TextInput Title="Email"
+                        @bind-Value="Username"
+                                   name="@(nameof(Username))"
+                                   onkeydown="if(event.keyCode === 13) { event.preventDefault(); document.getElementById('form1').submit(); }" />
+                    </ValidationChild>
+                }
+
+                @if(Register)
+                {
+                    <ValidationChild ID="0" IsValid="() => !Register || Email?.Length > 0">
+                        <TextInput Title="Email" Type="email"
+                        @bind-Value="Email"
+                                   name="@(nameof(Email))"
+                                   onkeydown="if(event.keyCode === 13) { event.preventDefault(); document.getElementById('form1').submit(); }" />
+                    </ValidationChild>
+                }
+
+                <ValidationChild ID="1" IsValid="() => Password?.Length > 0">
+                    <TextInput 
+                        Type="password"
+                        Title="Passwort" 
+                        @bind-Value="Password" 
+                        name="@(nameof(Password))" 
+                        onkeydown="if(event.keyCode === 13) { event.preventDefault(); document.getElementById('form1').submit(); }" />
+                </ValidationChild>
+
+                @if(Register)
+                {
+                    <div class="w-100" style="border-bottom: 1px solid #444;"></div>
+                    <ValidationChild ID="0" IsValid="() => !Register || Firstname?.Length > 0">
+                        <TextInput Title="Vorname"
+                        @bind-Value="Firstname"
+                                   name="@(nameof(Firstname))"
+                                   onkeydown="if(event.keyCode === 13) { event.preventDefault(); document.getElementById('form1').submit(); }" />
+                    </ValidationChild>
+                    <ValidationChild ID="0" IsValid="() => !Register || Lastname?.Length > 0">
+                        <TextInput Title="Nachname"
+                        @bind-Value="Lastname"
+                                   name="@(nameof(Lastname))"
+                                   onkeydown="if(event.keyCode === 13) { event.preventDefault(); document.getElementById('form1').submit(); }" />
+                    </ValidationChild>
+                }
+
+                @if(!Register)
+                {
+                    <ValidationChild ID="2" IsValid="() => true">
+                        <CheckInput Title="Angemeldet bleiben" @bind-Value="RememberMe" />
+                    </ValidationChild>
+                }
+
+                <input type="hidden" name="@nameof(ReturnUrl)" value="@(ReturnUrl ?? (Register ? "/account/register" : $"/{NavigationManager.ToBaseRelativePath(NavigationManager.Uri.Split('?')[0])}"))" />
+
+                @if(!Register)
+                {
+                    <input type="hidden" name="@nameof(RememberMe)" value="@RememberMe.ToString()" />
+                }
+
+                @if(Register)
+                {
+                    <a class="link-underline-secondary link-secondary" style="cursor: pointer;" @onclick="@(() => NavigateTo("/account/login"))">Ich habe bereits ein Benutzerkonto</a>
+                }
+                else
+                {
+                    <a class="link-underline-secondary link-secondary" style="cursor: pointer;" @onclick="@(() => NavigateTo("/account/register"))">Ich habe noch kein Benutzerkonto</a>
+                }
+
+                @if(!Register)
+                {
+                    <a class="link-underline-secondary link-secondary" style="cursor: pointer;" @onclick="@(() => NavigateTo("/account/resetpassword"))">Passwort vergessen</a>
+                }
+
+                <ValidationEvaluation Class="btn btn-primary btn-block w-100" ValidationID="-1" InvalidDisable AsSubmitButton>@(Register ? "Registrieren" : "Anmelden")</ValidationEvaluation>
+            </form>
+        </ValidationMaster>
+    </div>
+</PageContent>
+
+    @code{
+
+    private string? Username { get; set; }
+
+    private string? Firstname { get; set; }
+
+    private string? Lastname { get; set; }
+
+    private string? Email { get; set; }
+
+    private string? Password { get; set; }
+
+    private bool RememberMe { get; set; }
+
+    [QueryParameter]
+    public string? Base64Message { get; set; }
+
+    [QueryParameter]
+    public bool Success { get; set; }
+
+    [Parameter]
+    public string? ReturnUrl { get; set; }
+
+    private bool Register { get; set; }
+
+    public string? message { get; set; }
+
+    protected override void OnLocationChanged()
+    {
+        base.OnLocationChanged();
+
+        if(NavigationManager.Uri.StartsWith(NavigationManager.ToAbsoluteUri("/account/register").AbsoluteUri))
+        {
+            Register = true;
+            InvokeAsync(StateHasChanged);
+        }
+        else
+        {
+            Register = false;
+            InvokeAsync(StateHasChanged);
+        }
+
+        if(Base64Message != null)
+        {
+            message = Encoding.ASCII.GetString(Convert.FromBase64String(Base64Message));
+            InvokeAsync(StateHasChanged);
+        }
+        else
+        {
+            message = null;
+        }
+    }
+}

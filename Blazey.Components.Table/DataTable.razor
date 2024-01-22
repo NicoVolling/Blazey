@@ -1,0 +1,227 @@
+﻿@using Blazey.Components.Data
+@using Microsoft.AspNetCore.Components.Web
+@using Blazey.Components.Input
+@inherits BaseComponent
+@typeparam T
+
+@if(ChildContent != null)
+{
+    <CascadingValue Name="CascadingDataTable" Value="this">
+        @ChildContent
+    </CascadingValue>
+}
+
+<div class="container-fluid">
+    <div class="vstack gap-2">
+        <div class="card container-fluid">
+            <div class="hstack gap-3">
+                <div class="text-muted w-100 d-none d-md-block">
+                    @if(Title != null)
+                    {
+                        @($"{Title}: {TRMC.X0_of_X1_entries(FilteredCollection?.Count() ?? 0, DataService.Count(DefaultFiltering))}")
+                    }
+                    else
+                    {
+                        @($"Filter & Einstellungen: {TRMC.X0_of_X1_entries(CurrentFilterResultCount, DataService.Count(DefaultFiltering))}")
+                    }
+                </div>
+                <div class="w-100 d-block d-md-none">
+
+                </div>
+                <div>
+                    <a class="btn btn-sm btn-outline-success border-0" href="@SearchQuery">
+                        <BSIcon Icon="IconClass.SEARCH" />
+                    </a>
+                </div>
+                <div class="vr"></div>
+                @if(DataFilters?.Count > 0)
+                {
+                    <div>
+                        <button class="btn btn-sm btn-outline-light border-0" data-bs-toggle="collapse" data-bs-target="#collapse_filter">
+                            <BSIcon Icon="IconClass.FUNNEL_FILL" />
+                        </button>
+                    </div>
+                }
+                <div>
+                    <button class="btn btn-sm btn-outline-light border-0" data-bs-toggle="collapse" data-bs-target="#collapse_sort">
+                        <BSIcon Icon="IconClass.SORT_ALPHA_DOWN" />
+                    </button>
+                </div>
+                <div>
+                    <button class="btn btn-sm btn-outline-light border-0" data-bs-toggle="collapse" data-bs-target="#collapse_settings">
+                        <BSIcon Icon="IconClass.GEAR_FILL" />
+                    </button>
+                </div>
+                <div class="vr"></div>
+                <div>
+                    @if(!DisableAddDelete) 
+                    {
+                        <a class="btn btn-sm btn-outline-light border-0" @onclick="@(() => { NavigateTo(GetQuery(("ID", null), ("Mode", (int)EditMode.Create))); })">
+                            <BSIcon AddIcon />
+                        </a>
+                    }
+                </div>
+            </div>
+            @if(DataFilters != null && DataFilters.Count > 0) 
+            {
+                <div class="mt-1 collapse p-2" id="collapse_filter" style="border-top: solid 1px #555;">
+                    <div class="row g-2 row-cols-2 row-cols-lg-4">
+                        @foreach(IDataFilter<T> DataFilter in DataFilters)
+                        {
+                            <CascadingValue Name="CascadingDataTable" Value="this">
+                                <DynamicComponent Type="DataFilter.Type" Parameters="GetParametersDataFilter(DataFilter)" />
+                            </CascadingValue>
+                        }
+                        <div class="col">
+                            <button class="btn btn-outline-light btn-sm mt-4 w-100" @onclick="ResetFilter">Filter zurücksetzen</button>
+                        </div>
+                    </div>
+                    <div class="row mt-2 small @(CurrentFilterResultCount == 0 ? "text-danger" : "text-muted")">
+                        <div class="col">
+                            @GenerateEntryTexts()
+                        </div>
+                    </div>
+                </div>
+            }
+            @if(DataColumns != null && DataColumns.Any())
+            {
+                
+                <div class="mt-1 collapse p-2" id="collapse_sort" style="border-top: solid 1px #555;">
+                    <div class="row g-2 row-cols-2">
+                        <div class="col">
+                            <SelectionInput T="string" DataList="GetColumnTitles()" @bind-Value="SortColumn" Title="Spalte" Small />
+                        </div>
+                        <div class="col">
+                            <CascadingValue Name="CascadingDisabled" TValue="bool" Value="DataColumns.All(o => o.Title != SortColumn)">
+                                <SelectionInput T="int" Small @bind-Value="Order" Title="Sortierung" DataList="@(new List<KeyValuePair<int, string>>() { new(1, "Aufsteigend"), new(2, "Absteigend") })" HideNoSelectionOption />
+                            </CascadingValue>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="mt-1 collapse" id="collapse_settings" style="border-top: solid 1px #555;">
+                <div class="row g-2 row-cols-1 row-cols-md-2 row-cols-lg-4 pt-1">
+                    <div class="col">
+                        <div class="form-check form-switch back" @onclick="@(() => { Settings_ShowColumnNames = !Settings_ShowColumnNames; RefreshQuery(); NavigateTo(SearchQuery); })" style="cursor: pointer;">
+                            <input class="form-check-input" type="checkbox" role="switch" @bind="Settings_ShowColumnNames" style="cursor: pointer;">
+                            <label class="form-check-label" style="cursor: pointer;">Spaltennamen anzeigen</label>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-check form-switch back" @onclick="@(() => { Settings_ShowColumnHeader = !Settings_ShowColumnHeader; RefreshQuery(); NavigateTo(SearchQuery); })" style="cursor: pointer;">
+                            <input class="form-check-input" type="checkbox" role="switch" @bind="Settings_ShowColumnHeader" style="cursor: pointer;">
+                            <label class="form-check-label" style="cursor: pointer;">Spaltenkopf anzeigen</label>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <SelectionInput T="int" Title="Einträge / Seite" DataList="@(new List<KeyValuePair<int, string>>() { new(5, "5 Einträge / Seite"), new(10, "10 Einträge / Seite"), new(25, "25 Einträge / Seite"), new(50, "50 Einträge / Seite") })" @bind-Value="chunkSize" Small HideNoSelectionOption />
+                    </div>
+                </div>
+            </div>
+        </div>
+        @if (DataColumns != null)
+        {
+            int DataColumnsIndex = 0;
+            <div class="card container-fluid collapse @(Settings_ShowColumnHeader ? "show" : "")" style="box-shadow: none; border: 0px;">
+                @foreach (IEnumerable<DataColumn<T>> DataColumns in DataColumns.Chunk(4))
+                {
+                    int DataColumnIndex = 0;
+                    <div class="row row-cols-2 row-cols-lg-4">
+                        @foreach (DataColumn<T> DataColumn in DataColumns)
+                        {
+                            <div class="col my-1 @(DataColumnIndex == 0 && DataColumnsIndex == 0 ? "fw-bold" : "") @(DataColumnIndex == 1 ? " text-lg-start text-end" : "") @(DataColumnIndex == 3 ? "text-lg-start text-end" : "")" style="color: #ddd">
+                                @DataColumn.Title
+                            </div>
+                            DataColumnIndex++;
+                        }
+                    </div>
+                    DataColumnsIndex++;
+                }
+            </div>
+        }
+
+        <CascadingValue Name="CascadingDisabled" Value="true">
+            @foreach (T Value in PagedCollection ?? new List<T>())
+            {
+                if (DataColumns != null)
+                {
+                    int DataColumnsIndex = 0;
+                    <div class="card @(!DisableDetails ? "card-hover" : "") container-fluid">
+                        @foreach (IEnumerable<DataColumn<T>> DataColumns in DataColumns.Chunk(4))
+                        {
+                            int DataColumnIndex = 0;
+                            <div class="row row-cols-2 @($"row-cols-lg-{DataColumns.Count()}")">
+                                @foreach(DataColumn<T> DataColumn in DataColumns) 
+                                {
+                                    @if (DataColumnsIndex == 0 && DataColumnIndex == 0)
+                                    {
+                                        <a class="col my-2 fw-bold @(!DisableDetails ? "link-light stretched-link" : "") text-decoration-none" @onclick="@(() => { if(!DisableDetails) { NavigateTo(GetQuery(("ID", Value.Id.ToString("N")), ("Mode", (int)EditMode.View))); } })" href="#">
+                                            <div class="vstack text-truncate">
+                                                <DynamicComponent Type="typeof(DataColumn<T>)" Parameters="GetParametersDataColumn(DataColumn, Value)" />
+                                                <div class="collapse @(Settings_ShowColumnNames ? "show" : "") small fw-normal" style="color: #aaa; border-top: 1px solid #444;">
+                                                    @DataColumn.Title
+                                                </div>
+                                            </div>
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <div class="col my-2 @(DataColumnIndex == 1 ? " text-lg-start text-end" : "") @(DataColumnIndex == 3 ? "text-lg-start text-end" : "")">
+                                            <div class="vstack text-truncate">
+                                                <DynamicComponent Type="typeof(DataColumn<T>)" Parameters="GetParametersDataColumn(DataColumn, Value)" />
+                                                <div class="collapse @(Settings_ShowColumnNames ? "show" : "") small" style="color: #aaa; border-top: 1px solid #444;">
+                                                    @DataColumn.Title
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                    DataColumnIndex++;
+                                }
+                            </div>
+                            DataColumnsIndex++;
+                        }
+                    </div>
+                }
+            }
+        </CascadingValue>
+        @if (MaxPage > 1)
+        {
+            <div class="sticky-bottom pt-2" style="padding-bottom: 1px;">
+                <div class="card">
+                    <nav class="w-100 d-flex justify-content-between">
+                        <a class="btn btn-outline-light @(Page <= 1 ? "disabled" : "")" href="@(GetQuery((nameof(Page), Page - 1)))">&laquo;</a>
+                        <div class="hstack gap-1">
+                            @if (Page != 1)
+                            {
+                                <a class="btn btn-outline-light border-0"href="@(GetQuery((nameof(Page), 1)))">1</a>
+                                <div class="vr"></div>
+                            }
+                            @if (Page - 1 > 1)
+                            {
+                                <a class="btn btn-outline-light border-0"href="@(GetQuery((nameof(Page), Page - 1)))">@(Page - 1)</a>
+                            }
+                            <a class="btn btn-primary fw-bold disabled" href="@(GetQuery((nameof(Page), Page)))">@Page</a>
+
+                            @if (Page + 1 < MaxPage)
+                            {
+                                <a class="btn btn-outline-light border-0"href="@(GetQuery((nameof(Page), Page + 1)))">@(Page + 1)</a>
+                            }
+                            @if (MaxPage != Page)
+                            {
+                                <div class="vr"></div>
+                                <a class="btn btn-outline-light border-0" href="@(GetQuery((nameof(Page), MaxPage)))">@MaxPage</a>
+                            }
+                        </div>
+                        <a class="btn btn-outline-light @(Page >= MaxPage ? "disabled" : "")" href="@(GetQuery((nameof(Page), Page + 1)))">&raquo;</a>
+                    </nav>
+                </div>
+            </div>
+        } 
+        
+        @if(!FirstRender && MaxPage < 1)
+        {
+            <div class="alert alert-danger">@TRMC.There_is_no_entry_matching_the_search_parameters()</div>
+        }
+    </div>
+</div>

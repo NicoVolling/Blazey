@@ -1,0 +1,21 @@
+﻿@inherits BaseComponent
+
+@if (AsSubmitButton)
+{
+    <button type="submit" class="@FullClass">
+        @if (ChildContent != null)
+        {
+            @ChildContent(FullClass.Contains("disabled"))
+        }
+    </button>
+}
+else
+{
+    <span @onclick="onclick"
+          class="@FullClass">
+        @if (ChildContent != null)
+        {
+            @ChildContent(FullClass.Contains("disabled"))
+        }
+    </span>
+}

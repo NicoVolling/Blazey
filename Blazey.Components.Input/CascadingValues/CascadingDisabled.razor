@@ -1,0 +1,17 @@
+﻿<CascadingValue Name="CascadingDisabled" Value="@(Override ? Value : Value || Disabled)">
+    @ChildContent
+</CascadingValue>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [CascadingParameter(Name = "CascadingDisabled")]
+    public bool Disabled { get; set; }
+
+    [Parameter]
+    public bool Value { get; set; }
+
+    [Parameter]
+    public bool Override { get; set; }
+}

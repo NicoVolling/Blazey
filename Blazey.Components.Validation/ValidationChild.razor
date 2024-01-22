@@ -1,0 +1,8 @@
+﻿@inherits BaseComponent
+
+@if (ChildContent != null)
+{
+    <CascadingValue Name="CascadingValid" TValue="bool?" Value="@(IsValid() ? ShowValid ? true : null : false)">
+        @ChildContent
+    </CascadingValue>
+}

@@ -1,0 +1,45 @@
+﻿@inherits BaseComponent
+
+<li class="nav-item dropdown list-unstyled @Class">
+    <a class="nav-link dropdown-toggle @(Active ? "active" : "")" href="#" role="button" data-bs-toggle="dropdown">
+        @if (Icon != null)
+        {
+            <BSIcon Icon="@Icon.Value" me_3 />
+        } @Title
+    </a>
+    <ul class="dropdown-menu dropdown-menu-dark bg-nav">
+        @ChildContent
+    </ul>
+</li>
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = default!;
+
+    [Parameter]
+    public IconClass? Icon { get; set; }
+
+    [Parameter, EditorRequired]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter, EditorRequired]
+    public string Link { get; set; } = default!;
+
+    [Parameter]
+    public bool MustMatch { get; set; }
+
+    [Parameter]
+    public string? Class { get; set; }
+
+    bool Active { get => MustMatch ? uri == Link : uri.StartsWith(Link); }
+
+    string uri { get => "/" + NavigationManager.Uri.Replace(NavigationManager.BaseUri, ""); }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        this.NavigationService.LocationChanged += (s, e) =>
+        {
+            InvokeAsync(StateHasChanged);
+        };
+    }
+}

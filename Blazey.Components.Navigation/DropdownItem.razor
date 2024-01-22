@@ -1,0 +1,13 @@
+﻿@inherits BaseComponent
+
+<li><a class="dropdown-item" href="@Link">@if (ChildContent != null) { @ChildContent }@Title</a></li>
+@code {
+    [Parameter, EditorRequired]
+    public string Link { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = default!;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

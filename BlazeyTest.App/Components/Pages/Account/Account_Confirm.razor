@@ -1,0 +1,60 @@
+﻿@page "/account/confirm/{id}/{token}"
+@using Microsoft.AspNetCore.Identity;
+@using System.Text;
+
+@inherits BaseComponent
+
+    @if(Success == true)
+    {
+        <PageContent Title="Email bestätigt" TitleCenter Page="this">
+            <h4>
+                Deine Email ist bestätigt und dein Benutzerkonto kann jetzt verwendet werden.
+            </h4>
+            <a class="link-light link-underline-light" href="/account/login">Zum Login</a>
+        </PageContent>
+    }
+    else if(Success == false)
+    {
+        <Error_404 />
+    }
+
+@code {
+    [Parameter]
+    public string? token { get; set; }
+    [Parameter]
+    public string? id { get; set; }
+
+    [Inject]
+    public UserManager<User> UserManager { get; set; } = default!;
+
+    private bool? Success { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if(token != null && id != null)
+        {
+            User? user = await UserManager.FindByIdAsync(id);
+            if (user != null)
+            {
+                IdentityResult result = await UserManager.ConfirmEmailAsync(user, Encoding.ASCII.GetString(Convert.FromBase64String(token)));
+                if(result.Succeeded)
+                {
+                    Success = true;
+                    await InvokeAsync(StateHasChanged);
+                }
+                else
+                {
+                    Success = false;
+                }
+            }
+            else
+            {
+                Success = false;
+            }
+        }
+        else
+        {
+            Success = false;
+        }
+    }
+}

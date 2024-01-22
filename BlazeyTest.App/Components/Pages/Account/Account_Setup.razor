@@ -1,0 +1,73 @@
+﻿@using Blazey.Security.AdminCode
+@inherits BaseComponent
+
+@if(access)
+{
+    <PageContent Title="Admin Setup" TitleCenter Page="this">
+        <div class="container-fluid" style="max-width: 300px;">
+            <ValidationMaster>
+                <form method="post" id="form1" class="vstack gap-2" action="/account/api/registeradmin">
+                    <ValidationChild ID="0" IsValid="() => Username?.Length > 0">
+                        <TextInput 
+                            Title="Username" 
+                            @bind-Value="Username" 
+                            name="@(nameof(Username))" 
+                            onkeydown="if(event.keyCode === 13) { event.preventDefault(); document.getElementById('form1').submit(); }" />
+                    </ValidationChild>
+                            
+                    <ValidationChild ID="1" IsValid="() => Password?.Length > 0">
+                        <TextInput 
+                            Type="password"
+                            Title="Password" 
+                            @bind-Value="Password" 
+                            name="@(nameof(Password))" 
+                            onkeydown="if(event.keyCode === 13) { event.preventDefault(); document.getElementById('form1').submit(); }" />
+                    </ValidationChild>
+                    <input type="hidden" value="@AdminCode" name="@(nameof(AdminCode))" />
+                    <input type="hidden" value="@ReturnUrl" name="@(nameof(ReturnUrl))" />
+                    <ValidationEvaluation Class="btn btn-primary btn-block w-100" ValidationID="-1" InvalidDisable AsSubmitButton>Create Admin Account</ValidationEvaluation>
+                </form>
+            </ValidationMaster>
+        </div>
+    </PageContent>
+}
+else
+{
+    <Error_404 />
+}
+
+@code {
+    [Inject]
+    private AdminCodeService adminCodeService { get; set; } = default!;
+
+    [Parameter]
+    public string? AdminCode { get; set; }    
+    
+    [Parameter]
+    public string? ReturnUrl { get; set; }
+
+    private string? Username { get; set; }
+
+    private string? Password { get; set; }
+
+    bool access = false;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        if (!access)
+        {
+            if(adminCodeService.Validate(AdminCode ?? string.Empty))
+            {
+                access = true;
+                InvokeAsync(StateHasChanged);
+            }
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+    }
+}

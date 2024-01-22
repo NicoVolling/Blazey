@@ -1,0 +1,23 @@
+﻿@using Blazey.Components
+@using Blazey.Security.Authorization
+@using Blazey.Security.Identity
+@using Microsoft.AspNetCore.Identity;
+
+@inherits BaseComponent
+
+@typeparam T_User where T_User : IdentityUser<Guid>, IUser
+@typeparam T_LoginPage
+@typeparam T_404Page
+
+@if (Display && ChildContent != null)
+{
+    @ChildContent(User)
+}
+else if (ShowLoginIfNotAuthorized && !ValidateAsync(BaseRules.Authenticated).Result)
+{
+    <DynamicComponent Type="typeof(T_LoginPage)" Parameters="@(new Dictionary<string, object>() { { "ReturnUrl", $"/{NavigationManager.Uri.Replace(NavigationManager.BaseUri, "")}" } })" />
+}
+else if (Show404NotAuthorized)
+{
+    <DynamicComponent Type="typeof(T_404Page)" />
+}

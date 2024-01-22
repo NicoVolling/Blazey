@@ -1,0 +1,17 @@
+﻿@using Blazey.Components
+@using Blazey.Components.Navigation
+@using Blazey.Components.Page
+@using BlazeyTest.Application.Components.Layout.Navigation
+@inherits LayoutComponentBase
+
+<NavMenu />
+
+<PageContainerLayout>
+    @Body
+</PageContainerLayout>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>

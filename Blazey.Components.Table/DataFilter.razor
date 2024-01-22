@@ -1,0 +1,51 @@
+﻿@using Blazey.Components.Input
+
+@inherits DataTableChild<T>
+@typeparam T
+@typeparam T_Value
+
+@if(__Render) 
+{
+    if(typeof(T_Value) == typeof(string))
+    {
+        <div class="col">
+            <TextInput_Generic T="T_Value" Title="@Title" @bind-Value="Value" Small Check />
+        </div>
+    }
+    else if(typeof(T_Value) == typeof(double?))
+    {
+        @if(!__FilterObjectRanged)
+        {
+            <div class="col"><DoubleInput_Generic T="T_Value" Title="@Title" @bind-Value="Value" Small Check /></div>
+        }
+        else
+        {
+            <div class="col"><DoubleInput_Generic T="T_Value" Title="@($"{"von"} {Title}")" @bind-Value="Min" Small Check /></div>
+            <div class="col"><DoubleInput_Generic T="T_Value" Title="@($"{"bis"} {Title}")" @bind-Value="Max" Small Check /></div>
+        }
+    }
+    else if(typeof(T_Value) == typeof(int?))
+    {
+        @if(!__FilterObjectRanged)
+        {
+            <div class="col"><IntegerInput_Generic T="T_Value" Title="@Title" @bind-Value="Value" Small Check /></div>
+        }
+        else
+        {
+            <div class="col"><IntegerInput_Generic T="T_Value" Title="@($"{"von"} {Title}")" @bind-Value="Min" Small Check /></div>
+            <div class="col"><IntegerInput_Generic T="T_Value" Title="@($"{"bis"} {Title}")" @bind-Value="Max" Small Check /></div>
+        }
+    }
+    else if(typeof(T_Value) == typeof(DateTime?))
+    {
+        @if(!__FilterObjectRanged)
+        {
+            <div class="col"><DateInput_Generic T="T_Value" Title="@Title" @bind-Value="Value" Small Check /></div>
+        }
+        else
+        {
+            <div class="col"><DateInput_Generic T="T_Value" Title="@($"{"von"} {Title}")" @bind-Value="Min" Small Check /></div>
+            <div class="col"><DateInput_Generic T="T_Value" Title="@($"{"bis"} {Title}")" @bind-Value="Max" Small Check /></div>
+        }
+    }
+}

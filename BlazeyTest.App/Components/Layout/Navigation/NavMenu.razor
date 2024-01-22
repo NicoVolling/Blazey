@@ -1,0 +1,52 @@
+﻿@using Blazey.Components
+@using Blazey.Components.Navigation
+@using BlazeyTest.Application.Components.Components.Security
+@using BlazeyTest.Application.Components.Pages.Account
+@inherits BaseComponent
+
+<NavigationMenuWithLogin T_404Page="Blazey.Components.Error_404" T_LoginPage="Account_Login" T_User="BlazeyTest.Application.Data.Security.User" Title="GameIT" LogoSource="https://files.gameit.pro/Logos/GameIT-Logo-2.png">
+
+    <Authorize ValidationRule="Rules.Authenticated" Context="_">
+
+        <DropdownList Title="Listen" Icon="IconClass.LIST_STARS" Link="/lists">
+            <DropdownItem Title="Watchlist" Link="/lists/watchlist"><BSIcon Icon="IconClass.EYE" me_3 /></DropdownItem>
+            <DropdownItem Title="TikToks" Link="/lists/tiktoks"><BSIcon Icon="IconClass.TIKTOK" me_3 /></DropdownItem>
+            <DropdownItem Title="Spiele" Link="/lists/games"><BSIcon Icon="IconClass.JOYSTICK" me_3 /></DropdownItem>
+        </DropdownList>
+
+        <Authorize ValidationRule="Rules.Permission_Moderator" Context="__">
+            <DropdownList Title="Verwaltung" Icon="IconClass.GEAR_FILL" Link="/administration">
+            <Authorize ValidationRule="Rules.IsSysAdmin">
+                <DropdownItem Title="Einstellungen" Link="/administration/configuration" />
+                <DropdownSeperator />
+            </Authorize>
+
+            <DropdownItem Title="Listen" Link="/administration/lists" />
+            <DropdownItem Title="Links" Link="/administration/links" />
+            <DropdownItem Title="Server" Link="/administration/server" />
+            <Authorize ValidationRule="Rules.IsSysAdmin">
+                <DropdownItem Title="Passortmanager" Link="/administration/pwmanager" />
+                <DropdownSeperator />
+                <DropdownItem Title="Rechnungen" Link="/administration/accounting/invoices" />
+                <DropdownItem Title="Konto" Link="/administration/accounting/account" />
+                <DropdownItem Title="Verträge" Link="/administration/accounting/contracts" />
+            </Authorize>
+
+            <DropdownSeperator />
+                <DropdownItem Title="Benutzerkonten" Link="/administration/users" />
+            </DropdownList>
+        </Authorize>
+
+        <NavigationItem Title="Server" Link="/servers"><BSIcon Icon="IconClass.SERVER" me_3 /></NavigationItem>
+        <NavigationItem Title="Links" Link="/links"><BSIcon Icon="IconClass.SHARE_FILL" me_3 /></NavigationItem>
+
+    </Authorize>
+
+    <DropdownList Title="Über uns" Icon="IconClass.INFO_CIRCLE_FILL" Link="/info">
+        <DropdownItem Title="Team" Link="/info/team"><BSIcon Icon="IconClass.PEOPLE_FILL" me_3 /></DropdownItem>
+        <DropdownItem Title="Regelwerk" Link="/info/rules"><BSIcon Icon="IconClass.BOOK_FILL" me_3 /></DropdownItem>
+        <DropdownItem Title="Versionshinweise" Link="/info/patch-notes"><BSIcon Icon="IconClass.CODE_SLASH" me_3 /></DropdownItem>
+        <DropdownItem Title="Impressum" Link="/info/imprint"><BSIcon Icon="IconClass.INFO_CIRCLE_FILL" me_3 /></DropdownItem>
+    </DropdownList>
+
+</NavigationMenuWithLogin>

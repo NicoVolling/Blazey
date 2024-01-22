@@ -1,0 +1,81 @@
+﻿@page "/administration/users"
+@using Blazey.Components.Table
+@using BlazeyTest.Application.Services.DataServices.Data_User
+
+@inherits BaseComponent
+
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+
+<PageContent Title="Benutzerkonten" Page="this" AuthRule="Rules.Permission_Moderator">
+    <DataTable T="User" DataService="DataService" Title="Benutzerkonten">
+        <DataFilter T="User" T_Value="string" Title="Nutzername" FilterObjectNormal="@((o, p) => o.Where(o => o.UserName != null && o.UserName.Contains(p)))" />
+        <DataFilter T="User" T_Value="DateTime?" Title="Sperre" FilterObjectRanged="@((o, p, q) => o.Where(o => (p == null || o.LockoutEnd > p) && (q == null || o.LockoutEnd < q)))" />
+        <DataFilter T="User" T_Value="string" Title="Status" FilterObjectNormal="@((o, p) => o.Where(o => p == null || ((o.LockoutEnd == null || o.LockoutEnd < DateTime.Now) ? "Aktiv" : "Gesperrt").Contains(p)))" />
+        <DataColumn T="User" Title="Nutzername" GetPropertyString="@(o => o.UserName)" Context="KVP" OrderDescending="o => o.OrderByDescending(p => p.UserName)" OrderAscending="o => o.OrderBy(p => p.UserName)" />
+        <DataColumn T="User" Title="Rechte" GetPropertyString="@(o => o.Permissions.IsSysAdmin ? "Systemadmin" : o.Permissions.IsModerator ? "Moderator" : "Nutzer")" Context="KVP" OrderDescending="o => o.OrderByDescending(p => p.Permissions.IsSysAdmin ? 0 : p.Permissions.IsModerator ? 1 : 0)" OrderAscending="o => o.OrderBy(p => p.Permissions.IsSysAdmin ? 0 : p.Permissions.IsModerator ? 1 : 0)" />
+        <DataColumn T="User" Title="Email" GetPropertyString="@(o => o.Email)" Context="KVP" OrderDescending="o => o.OrderByDescending(p => p.Email)" OrderAscending="o => o.OrderBy(p => p.Email)" />
+        <DataColumn T="User" Title="Status" GetPropertyString="@(o => o.LockoutEnd == null || o.LockoutEnd < DateTime.Now ? "Aktiv" : "Gesperrt")" Context="KVP" OrderDescending="o => o.OrderByDescending(p => p.LockoutEnd)" OrderAscending="o => o.OrderBy(p => p.LockoutEnd)">
+            <span style="color: @(KVP.Value == "Aktiv" ? "#8f8" : "#f88");">
+                @KVP.Value
+            </span>
+        </DataColumn>
+    </DataTable>
+
+    <Window Title="Benutzerkonto" OnClose="@(() => { NavigateTo(GetQuery(("ID", null), ("Mode", 1))); })" Visible="@(() => ID != null || Mode == 10)">
+        <WindowBody>
+            <DataModifier T="User" Title="Benutzerkonto" DataService="DataService" ListUrl="/administration/users" Context="State">
+                @{
+                    int i = 0;
+                }
+                <div class="vstack gap-5 py-2">
+                    <div class="white-margin">
+                        <h5>Allgemein</h5>
+                        <div class="row row-cols-1 row-cols-sm-2 g-2 ms-2">
+                            <ValidationChild ID="++i" IsValid="() => !string.IsNullOrEmpty(State.DataObject.UserName)" Class="col">
+                                <TextInput Title="Nutzername" @bind-Value="State.DataObject.UserName" PreventAutocompletion />
+                                </ValidationChild>
+                                <CascadingDisabled Value>
+                                <ValidationChild ID="++i" IsValid="() => true" Class="col">
+                                    <TextInput Title="Email-Adresse" @bind-Value="State.DataObject.Email" PreventAutocompletion />
+                                    </ValidationChild>
+                                </CascadingDisabled>
+                            </div>
+                        </div>
+                        <div class="white-margin">
+                            <h5>Personenbezogenene Daten</h5>
+                            <div class="row row-cols-1 row-cols-sm-2 g-2 ms-2">
+                                <ValidationChild ID="++i" IsValid="() => !string.IsNullOrEmpty(State.DataObject.Firstname)" Class="col">
+                                    <TextInput Title="Vorname" @bind-Value="State.DataObject.Firstname" PreventAutocompletion />
+                                </ValidationChild>
+                                <ValidationChild ID="++i" IsValid="() => !string.IsNullOrEmpty(State.DataObject.Lastname)" Class="col">
+                                    <TextInput Title="Nachname" @bind-Value="State.DataObject.Lastname" PreventAutocompletion />
+                                </ValidationChild>
+                            </div>
+                        </div>
+                        <div class="white-margin">
+                            <h5>Rechte</h5>
+                            <div class="row row-cols-1 row-cols-sm-2 g-2 ms-2">
+                                <ValidationChild ID="++i" IsValid="() => true" Class="col">
+                                    <CheckInput Title="Administrator" @bind-Value="State.DataObject.Permissions.IsSysAdmin" Switch />
+                                </ValidationChild>
+                                <ValidationChild ID="++i" IsValid="() => true" Class="col">
+                                    <CheckInput Title="Moderator" @bind-Value="State.DataObject.Permissions.IsModerator" Switch />
+                                </ValidationChild>
+                            </div>
+                        </div>
+                    </div>
+                </DataModifier>
+        </WindowBody>
+    </Window>
+ </PageContent>
+
+ @code {
+    [Inject]
+    public DS_User DataService { get; set; } = default!;
+
+    [QueryParameter]
+    public Guid? ID { get; set; }
+
+    [QueryParameter(DefaultValue = "1")]
+    public int Mode { get; set; }
+}

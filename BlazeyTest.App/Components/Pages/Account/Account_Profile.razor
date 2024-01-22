@@ -1,0 +1,70 @@
+﻿@page "/account/profile"
+@using Blazey.Components.Data
+@using Blazey.Security.Services
+@using BlazeyTest.Application.Services.DataServices.Data_User
+
+@inherits BaseComponent
+
+@inject DS_User DataService
+@inject AuthorizationService<User> AuthService
+
+<PageContent AuthRule="Rules.Authenticated" Title="Profil" Page="this">
+    <DataModifier T="User" Title="Benutzerkonto" DataService="DataService" ListUrl="@(null)" Context="State" Alt_Object_ID="@(AuthService.User?.Id.ToString("N"))" DisableCreation DisableDeletion>
+        @{ int i = 0; }
+        <div class="vstack gap-5 py-2">
+            <div class="alert alert-info mb-0">
+                Um Nutzername, Email-Adresse, Vor- oder Nachname zu ändern oder dein Konto löschen zu lassen, wende dich bitte an einen Administrator.
+            </div>
+            <div class="white-margin">
+                <h5>Allgemein</h5>
+                <div class="row row-cols-1 row-cols-sm-2 g-2 ms-2">
+                    <CascadingDisabled Value>
+                        <ValidationChild ID="++i" IsValid="() => !string.IsNullOrEmpty(State.DataObject.UserName)" Class="col">
+                            <TextInput Title="Nutzername" @bind-Value="State.DataObject.UserName" PreventAutocompletion />
+                        </ValidationChild>
+                        <ValidationChild ID="++i" IsValid="() => true" Class="col">
+                            <TextInput Title="Email-Adresse" @bind-Value="State.DataObject.Email" PreventAutocompletion />
+                        </ValidationChild>
+                    </CascadingDisabled>
+                </div>
+            </div>
+            <div class="white-margin">
+                <h5>Sicherheit</h5>
+                <div class="row row-cols-1 row-cols-sm-2 g-2 ms-2">
+                    <ValidationChild ID="0" IsValid="() => true" Class="mb-3">
+                        <TextInput Title="Aktuelles Passwort" Type="password" @bind-Value="State.DataObject.InputDataObject.CurrentPassword" />
+                    </ValidationChild>
+                    <ValidationChild ID="0" IsValid="() => true" Class="mb-3">
+                        <TextInput Title="Neues Passwort" Type="password" @bind-Value="State.DataObject.InputDataObject.NewPassword" />
+                    </ValidationChild>
+                </div>
+            </div>
+            <div class="white-margin">
+                <h5>Personenbezogenene Daten</h5>
+                <div class="row row-cols-1 row-cols-sm-2 g-2 ms-2">
+                    <CascadingDisabled Value>
+                        <ValidationChild ID="++i" IsValid="() => !string.IsNullOrEmpty(State.DataObject.Firstname)" Class="col">
+                            <TextInput Title="Vorname" @bind-Value="State.DataObject.Firstname" PreventAutocompletion />
+                        </ValidationChild>
+                        <ValidationChild ID="++i" IsValid="() => !string.IsNullOrEmpty(State.DataObject.Lastname)" Class="col">
+                            <TextInput Title="Nachname" @bind-Value="State.DataObject.Lastname" PreventAutocompletion />
+                        </ValidationChild>
+                    </CascadingDisabled>
+                </div>
+            </div>
+            <div class="white-margin">
+                <h5>Rechte</h5>
+                <div class="row row-cols-1 row-cols-sm-2 g-2 ms-2">
+                    <CascadingDisabled Value>
+                        <ValidationChild ID="++i" IsValid="() => true" Class="col">
+                            <CheckInput Title="Administrator" @bind-Value="State.DataObject.Permissions.IsSysAdmin" Switch />
+                        </ValidationChild>
+                        <ValidationChild ID="++i" IsValid="() => true" Class="col">
+                            <CheckInput Title="Moderator" @bind-Value="State.DataObject.Permissions.IsModerator" Switch />
+                        </ValidationChild>
+                    </CascadingDisabled>
+                </div>
+            </div>
+        </div>
+    </DataModifier>
+</PageContent>

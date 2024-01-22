@@ -1,0 +1,65 @@
+﻿@page "/account/confirm/{id}/{token}"
+@using Blazey.Components
+@using Microsoft.AspNetCore.Identity
+@using System.Text
+
+@inherits BaseComponent
+
+@typeparam T_User
+@typeparam T_404Page
+
+@if(Success == true)
+{
+    <h4>
+        Deine E-Mail ist bestätigt und dein Benutzerkonto kann jetzt verwendet werden.
+    </h4>
+    <a class="link-light link-underline-light" href="/account/login">Zum Login</a>
+}
+else if(Success == false)
+{
+    <h4>
+        Das hat leider nicht funktioniert. Ist deine E-Mail vielleicht schon bestätigt?
+    </h4>
+    <a class="link-light link-underline-light" href="/account/login">Zum Login</a>
+}
+
+@code {
+    [Parameter]
+    public string? token { get; set; }
+    [Parameter]
+    public string? id { get; set; }
+
+    [Inject]
+    public UserManager<T_User> UserManager { get; set; } = default!;
+
+    private bool? Success { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if(token != null && id != null)
+        {
+            T_User? user = await UserManager.FindByIdAsync(id);
+            if (user != null)
+            {
+                IdentityResult result = await UserManager.ConfirmEmailAsync(user, Encoding.ASCII.GetString(Convert.FromBase64String(token)));
+                if(result.Succeeded)
+                {
+                    Success = true;
+                    await InvokeAsync(StateHasChanged);
+                }
+                else
+                {
+                    Success = false;
+                }
+            }
+            else
+            {
+                Success = false;
+            }
+        }
+        else
+        {
+            Success = false;
+        }
+    }
+}

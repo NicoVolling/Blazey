@@ -1,0 +1,54 @@
+﻿@typeparam T_Value
+@inherits BaseControl<T_Value>
+
+<div class="@(Pre != null || Check ? "input-group" : "")">
+    @if (Pre != null)
+    {
+        <span class="input-group-text">@Pre</span>
+    }
+    @if(Check)
+    {
+        <div class="input-group-text">
+            <input class="form-check-input mt-0" type="checkbox" @bind="IsChecked" />
+        </div>
+    }
+    <div class="form-floating">
+        <input 
+            type="@Type" 
+            name="@name"
+            value="@RawValue"
+            @oninput="OnInputChange"
+            placeholder="@Title"
+            class="form-control @(Small ? "form-control-sm" : "") @(TextCenter ? "text-center" : "") @(!IsValueValid ? "is-invalid" : "") @(CascadingValid==true ? "is-valid" : CascadingValid==false ? "is-invalid" : "")"
+            list="@DataListID.ToString("N")"
+            @onfocusin="OnFocusIn"
+            @onfocusout="OnFocusOut"
+            onkeydown="@onkeydown"
+            autocomplete="@(PreventAutocompletion ? "new-password" : null)" id="@Id.ToString("N")"  disabled="@(Disabled ? "" : null)" readonly="@(ReadOnly ? "" : null)">
+        @if(DataList != null)
+        {
+            <datalist id="@DataListID.ToString("N")">
+                @foreach (string Suggestion in DataList)
+                {
+                    <option value="@Suggestion" />
+                }
+            </datalist>
+        }
+        @if (!HideTitle)
+        {
+            <label for="@Id.ToString("N")">@Title</label>
+        }
+        @if(IsValueValid && ChildContent != null)
+        {
+            <div class="invalid-feedback">
+                @ChildContent
+            </div>
+        }
+        else 
+        {
+            <div class="invalid-feedback">
+                @GetInvalidMessage()
+            </div>
+        }
+    </div>
+</div>

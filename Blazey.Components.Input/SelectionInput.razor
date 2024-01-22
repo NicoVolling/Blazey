@@ -1,0 +1,32 @@
+﻿@inherits BaseControl<T>
+
+@typeparam T
+
+<div class="form-floating input-group @(FullWidth ? "w-100" : "")">
+    @if (Check)
+    {
+        <div class="input-group-text">
+            <input class="form-check-input mt-0" type="checkbox" @bind="IsChecked" />
+        </div>
+    }
+    <select class="form-select @(Small ? "form-select-sm" : "")" value="@RawValue" @onchange="OnValueChanged" disabled="@(Disabled || (Check && !IsChecked) ? "" : null)" id="@ID.ToString("N")">
+        @if (!HideNoSelectionOption)
+        {
+            <option value="@DefaultValueText" selected="@Equals(RawValue, DefaultValueText)">@DefaultValueText</option>
+        }
+        @foreach (KeyValuePair<T, string> KVP in DataList)
+        {
+            <option value="@KVP.Value" selected="@Equals(RawValue, KVP.Value)">@KVP.Value</option>
+        }
+    </select>
+    @if(!HideTitle && Title != null)
+    {
+        <label>@Title</label>
+    }    
+    @if (ChildContent != null)
+    {
+        <div class="invalid-feedback">
+            @ChildContent
+        </div>
+    }
+</div>

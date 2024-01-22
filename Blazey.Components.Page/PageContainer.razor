@@ -1,0 +1,63 @@
+﻿@using Blazey.Security.Authorization
+@using Blazey.Security.Components
+@using Microsoft.AspNetCore.Components.Web
+@inherits BaseComponent
+
+@typeparam T_User
+@typeparam T_LoginPage
+@typeparam T_404Page
+
+<Authorize T_User="T_User" T_LoginPage="T_LoginPage" T_404Page="T_404Page" ValidationRule="AuthRule" ShowLoginIfNotAuthorized Show404NotAuthorized>
+    <div class="p-0 py-2 pt-4">
+        <div class="px-2 d-flex justify-content-between @(TitleCenter == false ? "justify-content-md-start" : "") d-print-none" style="border-bottom: solid 1px #555;">
+            @if(Title != null)
+            {
+                @if(GoBackUrl != null)
+                {
+                    <h1 class="@(TitleCenter == false ? "me-md-3" : "") mb-0"><a href="@GoBackUrl" class="text-decoration-none text-muted"><BSIcon Icon="IconClass.ARROW_LEFT" /></a></h1>
+                }
+                <h1 class="text-center @(TitleCenter == false ? "text-md-start" : "") mb-0">
+                    @Title
+                </h1>
+                @if (GoBackUrl != null)
+                {
+                    <div class="me-3"></div>
+                }
+                <PageTitle>@ApplicationName - @Title</PageTitle>
+            }
+        </div>
+        <div class="my-3 px-1">
+            @if(ChildContent != null)
+            {
+                <CascadingValue Value="IsNoPage ? PageComponent : Page" TValue="BaseComponent" Name="PageComponent">
+                    @ChildContent
+                </CascadingValue>
+            }
+        </div>
+    </div>
+</Authorize>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public bool TitleCenter { get; set; }
+
+    [Parameter]
+    public BaseComponent Page { get; set; }
+
+    [Parameter]
+    public bool IsNoPage { get; set; }
+
+    [Parameter]
+    public string? GoBackUrl { get; set; }
+
+    [Parameter]
+    public Rule AuthRule { get; set; } = BaseRules.MatchAll;
+
+    protected virtual string ApplicationName { get => "Nico Volling"; }
+}

@@ -1,0 +1,20 @@
+﻿@using Blazey.Data.DataObject
+
+@inherits DataTableChild<T>
+@typeparam T where T : class, IBaseDataObject, new()
+
+@if (__Render)
+{
+    @if (__ChildContent != null)
+    {
+        @__ChildContent
+    }
+    else if (__Value != null && (__Value is not string str || !string.IsNullOrEmpty(str)))
+    {
+        @__Value
+    }
+    else
+    {
+        <span class="text-muted fst-italic">LEER</span>
+    }
+}

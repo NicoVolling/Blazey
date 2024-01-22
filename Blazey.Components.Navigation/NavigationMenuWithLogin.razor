@@ -1,0 +1,73 @@
+﻿@using Blazey.Security.Authorization
+@using Blazey.Security.Components
+@using Microsoft.AspNetCore.Identity;
+@using Microsoft.AspNetCore.Components.Web;
+
+@inherits BaseComponent
+
+@typeparam T_User
+@typeparam T_LoginPage
+@typeparam T_404Page
+
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-nav d-print-none">
+    <div class="container max-width-fhd">
+        <a class="navbar-brand" href="#"><img src="@LogoSource" alt="Logo" width="24" height="24" class="d-inline-block align-text-top me-2">@Title</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 @NearestClass">
+                @if (ChildContent != null)
+                {
+                    @ChildContent
+                }
+            </ul>
+            <Authorize T_User="T_User" T_404Page="T_404Page" T_LoginPage="T_LoginPage" ValidationRule="BaseRules.NotAuthenticated">
+                <a class="d-flex link-light" href="/account/login">Anmelden</a>
+            </Authorize>
+            <Authorize T_User="T_User" T_404Page="T_404Page" T_LoginPage="T_LoginPage" ValidationRule="BaseRules.Authenticated" Context="User">
+                <DropdownList Title="@User.UserName" Icon="IconClass.PERSON_SQUARE" Link="/account" Class="me-3 mb-3 mb-lg-0">
+                    @if(!HidePreferencesButton)
+                    {
+                        <DropdownItem Title="Einstellungen" Link="/account/preferences" />
+                    }
+                    @if(!HideProfileButton)
+                    {
+                        <DropdownItem Title="Profil" Link="/account/profile" />
+                    }
+                    @if(HidePreferencesButton && HideProfileButton)
+                    {
+                        <DropdownSeperator />
+                    }
+                    <li>
+                        <form method="post" action="/account/api/logout">
+                            <input type="hidden" name="ReturnUrl" value="@("/" + NavigationManager.Uri.Replace(NavigationManager.BaseUri, ""))" />
+                            <button type="submit" class="dropdown-item">Abmelden</button>
+                        </form>
+                    </li>
+                </DropdownList>
+            </Authorize>
+        </div>
+    </div>
+</nav>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = default!;
+
+    [Parameter]
+    public bool HidePreferencesButton { get; set; }
+
+    [Parameter]
+    public bool HideProfileButton { get; set; }
+
+    [Parameter]
+    public string NearestClass { get; set; } = string.Empty;
+
+    [Parameter]
+    public string LogoSource { get; set; } = "/img/Logo.png";
+}

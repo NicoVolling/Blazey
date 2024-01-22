@@ -1,0 +1,11 @@
+﻿<div class="position-relative pt-2 px-1 px-md-2" style="margin-top: 55px;">
+    @if(ChildContent != null)
+    {
+        @ChildContent
+    }
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

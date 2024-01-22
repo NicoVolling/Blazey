@@ -1,0 +1,38 @@
+﻿@using Blazey.Security.Authorization
+@using Blazey.Security.Components
+@using Microsoft.AspNetCore.Identity;
+@using Microsoft.AspNetCore.Components.Web;
+
+@inherits BaseComponent
+
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-nav d-print-none">
+    <div class="container max-width-fhd">
+        <a class="navbar-brand" href="#"><img src="@LogoSource" alt="Logo" width="24" height="24" class="d-inline-block align-text-top me-2">@Title</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 @DropdownListClass">
+                @if (ChildContent != null)
+                {
+                    @ChildContent
+                }
+            </ul>
+        </div>
+    </div>
+</nav>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = default!;
+
+    [Parameter]
+    public string DropdownListClass { get; set; } = string.Empty;
+
+    [Parameter]
+    public string LogoSource { get; set; } = "/img/Logo.png";
+}

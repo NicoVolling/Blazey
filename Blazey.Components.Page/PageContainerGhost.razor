@@ -1,0 +1,13 @@
+﻿@if (ChildContent != null)
+{
+    <CascadingValue Value="Page" TValue="BaseComponent" Name="PageComponent">
+        @ChildContent
+    </CascadingValue>
+}
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter, EditorRequired]
+    public BaseComponent Page { get; set; }
+}

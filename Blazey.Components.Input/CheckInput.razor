@@ -1,0 +1,8 @@
+﻿@inherits BaseControl<bool>
+
+<div class="form-check @(Switch ? "form-switch back" : "")">
+    <input class="form-check-input" type="checkbox" value="" @onchange="OnChanged" id="@id.ToString("N")" checked="@(Value ? "" : null )" disabled="@Disabled">
+    <label class="form-check-label" for="@id.ToString("N")">
+        @Title
+    </label>
+</div>

@@ -1,0 +1,91 @@
+﻿@using Blazey.Components.Input.CascadingValues
+@using Blazey.Data;
+@using Blazey.Components.Validation;
+@using Microsoft.AspNetCore.Components.Web
+
+@inherits BaseComponent
+@typeparam T
+
+
+@if(ChildContent != null)
+{
+
+    @if (!String.IsNullOrEmpty(AuthorizationError))
+    {
+        <div class="alert alert-danger m-2 mx-auto fade show">
+            <strong>@(TRMC.Error()): </strong>@AuthorizationError
+        </div>
+    }
+    @foreach (string Message in OperationState.ErrorMessages)
+    {
+        <div class="alert alert-danger m-2 mx-auto fade show">
+            <strong>@(TRMC.Error()): </strong>@Message
+        </div>
+    }
+    @foreach (string Message in OperationState.WarningMessages)
+    {
+        <div class="alert alert-warning m-2 mx-auto fade show">
+            <strong>@(TRMC.Warning()): </strong>@Message
+        </div>
+    }
+    @if(DataObject != null && EditMode != EditMode.Error)
+    {
+        <div class="vstack gap-2">
+            <ValidationMaster @ref="ValidationMaster">
+                <div class="hstack gap-2 p-2 d-print-none @(ModificationButtonsCondition.Invoke(DataObject) == false && (!PrintButtonEnabled || PrintButtonCondition.Invoke(DataObject) == false) ? "d-none" : "")" style="border-bottom: 1px solid #888;">
+                    @if (ModificationButtonsCondition.Invoke(DataObject))
+                    {
+                        <a class="btn btn-outline-light rounded-pill border-0 @(EditMode == EditMode.View ? "disabled" : "")" 
+                        href="@(EditMode == EditMode.Edit ? GetQuery(new (string, object?)[] { (nameof(Mode), (int)EditMode.View) }) : ListUrl)">
+                            <BSIcon Icon="IconClass.X_LG" />
+                        </a>
+                        <ValidationEvaluation InvalidDisable ValidationID="-1" Context="Disabled">
+                             <a class="btn btn-outline-success rounded-pill border-0 @((EditMode != EditMode.Edit && EditMode != EditMode.Create) || (Disabled || Unauthorized) ? "disabled" : "")"
+                                @onclick="SaveChanges">
+                                <BSIcon SaveIcon />
+                            </a>
+                        </ValidationEvaluation>
+                        <a class="btn btn-outline-warning rounded-pill border-0 @(EditMode != EditMode.View ? "disabled" : "")"
+                        href="@GetQuery(new (string Key, object? Value)[] { (nameof(Mode), (int)EditMode.Edit) })">
+                            <BSIcon ChangeIcon />
+                        </a>
+                        @if(!DisableDeletion)
+                        {
+                            <Button class="@($"btn btn-outline-danger rounded-pill border-0 {((EditMode != EditMode.View || DeletionUnauthorized) ? "disabled" : "")}")"
+                            onclick="async o => await Delete()">
+                                <BSIcon DeleteIcon />
+                            </Button>
+                        }
+                        @if (!DisableCreation)
+                        {
+                            <a class="btn btn-outline-light rounded-pill border-0 @(EditMode == EditMode.Edit ? "disabled" : "")"
+                            href="@GetQuery(new (string Key, object? Value)[] { (nameof(Mode), (int)EditMode.Create), ("ID", null) })">
+                                <BSIcon AddIcon />
+                            </a>
+                        }
+                    }
+                    @if(PrintButtonEnabled && PrintButtonCondition(DataObject))
+                    {
+                        <button class="btn btn-outline-info rounded-pill border-0 @(EditMode != EditMode.View ? "disabled" : "")"
+                        onclick="window.print()">
+                            <BSIcon Icon="IconClass.PRINTER" />
+                        </button>
+                    }
+                </div>
+                <div>
+                    <CascadingDisabled Value="@(EditMode == EditMode.View)">
+                        @ChildContent(new(DataObject, EditMode, OperationState))
+                    </CascadingDisabled>
+                </div>
+            </ValidationMaster>
+        </div>
+    }
+    else if(EditMode != EditMode.Error)
+    {
+        <div class="alert alert-danger m-2 mx-auto text-center">@TRMC.This_object_does_not_exist()</div>
+    }
+    else
+    {
+        <div class="alert alert-danger m-2 mx-auto text-center">@TRMC.A_unexpected_error_occured()</div>
+    }
+}

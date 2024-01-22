@@ -1,0 +1,31 @@
+﻿@inherits BaseComponent
+
+<li class="nav-item">
+    <a class="nav-link @(Active ? "active" : "")" href="@Link">@if (ChildContent != null) { @ChildContent }@Title</a>
+</li>
+@code {
+    [Parameter, EditorRequired]
+    public string Link { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = default!;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public bool MustMatch { get; set; }
+
+    bool Active { get => MustMatch ? uri == Link : uri.StartsWith(Link); }
+
+    string uri { get => "/" + NavigationManager.Uri.Replace(NavigationManager.BaseUri, ""); }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        NavigationService.LocationChanged += (s, e) =>
+        {
+            InvokeAsync(StateHasChanged);
+        };
+    }
+}

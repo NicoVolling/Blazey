@@ -1,0 +1,32 @@
+﻿@using BlazeyTest.Application.Components.Pages.Account
+@using Microsoft.AspNetCore.Components.Authorization
+@using BlazeyTest.Application.Services.DataServices.Data_User
+
+<CascadingAuthenticationState>
+        @if(!UserService.DoesAdminExist())
+        {
+            <LayoutView Layout="@typeof(Layout.MainLayout_NoNav)">
+                <Account_Setup_Initial />
+            </LayoutView>
+        }
+        else 
+        {
+            <Router AppAssembly="@typeof(App).Assembly">
+                <Found Context="routeData">
+                    <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)">
+                        <NotAuthorized>
+                            <Account_Login ReturnUrl="@("/" + NavMan.Uri.Replace(NavMan.BaseUri, ""))" />
+                        </NotAuthorized>
+                    </AuthorizeRouteView>
+                </Found>
+            </Router>
+        }
+</CascadingAuthenticationState>
+
+@code {
+    [Inject]
+    private DS_User UserService { get; set; } = default!;
+
+    [Inject]
+    private NavigationManager NavMan { get; set; } = default!;
+}

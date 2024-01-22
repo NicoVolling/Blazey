@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Blazey.Components.Navigation": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:60568;http://localhost:60569"
+    }
+  }
+}
