@@ -130,7 +130,7 @@ public partial class BaseComponent : ComponentBase
             if (!BC.QueryParametersEnabled) { continue; }
             foreach (var PropertyInfo in BC.GetType().GetProperties().Where(o => o.CanWrite))
             {
-                if (PropertyInfo.GetCustomAttribute<QueryParameterAttribute>() is QueryParameterAttribute qpa)
+                if (PropertyInfo.GetCustomAttribute<QueryParameterAttribute>() is QueryParameterAttribute qpa && PropertyInfo.GetCustomAttribute<QPReadOnlyAttribute>() is not QPReadOnlyAttribute)
                 {
                     string QueryName = GetQueryName(BC, qpa, PropertyInfo);
 
@@ -170,7 +170,6 @@ public partial class BaseComponent : ComponentBase
                             }
                         }
                         {
-
                             bool added = values.TryAdd(QueryName, value);
                             if (!added)
                             {

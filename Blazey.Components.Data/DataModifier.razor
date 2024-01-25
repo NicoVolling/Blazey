@@ -59,7 +59,7 @@
                         @if (!DisableCreation)
                         {
                             <a class="btn btn-outline-light rounded-pill border-0 @(EditMode == EditMode.Edit ? "disabled" : "")"
-                            href="@GetQuery(new (string Key, object? Value)[] { (nameof(Mode), (int)EditMode.Create), ("ID", null) })">
+                            href="@(GetQuery(new (string Key, object? Value)[] { (nameof(Mode), (int)EditMode.Create), ("ID", null) }))">
                                 <BSIcon AddIcon />
                             </a>
                         }

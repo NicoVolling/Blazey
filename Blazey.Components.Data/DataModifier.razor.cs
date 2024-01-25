@@ -9,6 +9,8 @@ namespace Blazey.Components.Data;
 
 public partial class DataModifier<T> : BaseComponent, IOperationStateProviderComponent where T : class, IBaseDataObject, new()
 {
+    private EditMode editMode;
+
     protected TaskResultMessageCollection TRMC { get; } = new();
 
     [Parameter]
@@ -34,14 +36,27 @@ public partial class DataModifier<T> : BaseComponent, IOperationStateProviderCom
     [Parameter]
     public bool DisableDeletion { get; set; }
 
-    public EditMode EditMode { get; set; }
+    public EditMode EditMode 
+    { 
+        get => editMode; 
+        set => editMode = value; 
+    }
 
     [Parameter, EditorRequired]
     public string ListUrl { get; set; } = string.Empty;
 
     [QueryParameter(DefaultValue = "1")]
     public int Mode
-    { get => (int)EditMode; set { if (Enum.TryParse(typeof(EditMode), value.ToString(), out object? editMode)) { EditMode = (EditMode)editMode; } } }
+    { 
+        get => (int)EditMode; 
+        set 
+        { 
+            if (Enum.TryParse(typeof(EditMode), value.ToString(), out object? editMode)) 
+            { 
+                EditMode = (EditMode)editMode; 
+            } 
+        } 
+    }
 
     [Parameter]
     public Func<T, bool> ModificationButtonsCondition { get; set; } = o => true;
@@ -179,7 +194,8 @@ public partial class DataModifier<T> : BaseComponent, IOperationStateProviderCom
             if (DataService.ChangeOrCreate(OperationState, DataObject).Success)
             {
                 EditMode = EditMode.View;
-                NavigateTo(GetQuery(new (string Key, object? Value)[] { ("ID", DataObject.Id.ToString("N")) }));
+                string query = GetQuery([("ID", DataObject.Id.ToString("N"))]);
+                NavigateTo(query);
             }
         }
     }

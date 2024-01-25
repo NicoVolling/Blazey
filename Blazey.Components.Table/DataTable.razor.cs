@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace Blazey.Components.Table;
 
-public partial class DataTable<T> : BaseComponent where T : class, IBaseDataObject, new()
+public partial class DataTable<T> : BaseComponent, IDataTable where T : class, IBaseDataObject, new()
 {
     private int CurrentFilterResultCount;
 
@@ -62,10 +62,10 @@ public partial class DataTable<T> : BaseComponent where T : class, IBaseDataObje
     public bool Settings_HideColumnNames { get; set; }
 
     [QueryParameter]
-    public bool Settings_ShowColumnHeader 
-    { 
-        get => settings_ShowColumnHeader; 
-        set => settings_ShowColumnHeader = value; 
+    public bool Settings_ShowColumnHeader
+    {
+        get => settings_ShowColumnHeader;
+        set => settings_ShowColumnHeader = value;
     }
 
     public bool Settings_ShowColumnNames { get => !Settings_HideColumnNames; set => Settings_HideColumnNames = !value; }
@@ -164,10 +164,34 @@ public partial class DataTable<T> : BaseComponent where T : class, IBaseDataObje
                 return;
             }
 
-            PagedCollection = FilteredCollection.Skip((Page - 1) * chunkSize).Take(chunkSize).AsEnumerable();
+            RefreshPagedCollection();
 
             InvokeAsync(StateHasChanged);
         }
+    }
+
+    private void RefreshPagedCollection()
+    {
+        PagedCollection = FilteredCollection?.Skip((Page - 1) * chunkSize).Take(chunkSize).AsEnumerable();
+    }
+
+    public Guid GetNext(Guid Current)
+    {
+        if (PagedCollection == null) { return Current; }
+        int index = PagedCollection.Select((a, i) => (a.Id == Current) ? i : -1).Max();
+        if (index == -1) { return Current; }
+        if (index == PagedCollection.Count() - 1 && Page < MaxPage) { Page = Page + 1; RefreshPagedCollection(); return PagedCollection.First().Id; }
+        if (index == PagedCollection.Count() - 1) { return Current; }
+        return PagedCollection.ElementAt(index + 1).Id;
+    }
+    public Guid GetPrevious(Guid Current)
+    {
+        if (PagedCollection == null) { return Current; }
+        int index = PagedCollection.Select((a, i) => (a.Id == Current) ? i : -1).Max();
+        if (index == -1) { return Current; }
+        if (index == 0 && Page > 1) { Page = Page - 1; RefreshPagedCollection(); return PagedCollection.Last().Id; }
+        if (index == 0) { return Current; }
+        return PagedCollection.ElementAt(index - 1).Id;
     }
 
     private void CalculateResultCount()
