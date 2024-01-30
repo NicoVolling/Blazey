@@ -5,7 +5,6 @@ namespace Blazey.Components.Table;
 
 public partial class DataColumn<T> : DataTableChild<T> where T : class, IBaseDataObject, new()
 {
-    private int order;
 
     [Parameter]
     public RenderFragment? __ChildContent { get; set; }
@@ -17,7 +16,7 @@ public partial class DataColumn<T> : DataTableChild<T> where T : class, IBaseDat
     public RenderFragment<KeyValuePair<T, string>>? ChildContent { get; set; }
 
     [Parameter, EditorRequired]
-    public Func<T, string> GetPropertyString { get; set; }
+    public Func<T, string> GetPropertyString { get; set; } = default!;
 
     [Parameter]
     public Func<IQueryable<T>, IQueryable<T>>? OrderAscending { get; set; }

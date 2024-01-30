@@ -267,7 +267,7 @@ public partial class DataTable<T> : BaseComponent, IDataTable where T : class, I
             { nameof(DataFilter.Title), DataFilter.Title },
             { nameof(DataFilter.__FilterObjectNormal), DataFilter.__FilterObjectNormal },
             { nameof(DataFilter.__FilterObjectRanged), DataFilter.__FilterObjectRanged },
-            { nameof(DataFilter.__RefreshSearchQuery), () => { RefreshQuery(); } },
+            { nameof(DataFilter.__RefreshSearchQuery), () => { OnLocationChanged(); } },
             { nameof(DataTableChild<T>.__Render), true }
         };
     }

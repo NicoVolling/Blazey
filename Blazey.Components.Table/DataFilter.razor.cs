@@ -55,9 +55,9 @@ public partial class DataFilter<T, T_Value> : DataTableChild<T>, IDataFilter<T> 
 
     public void Reset()
     {
-        Value = default(T_Value?);
-        Min = default(T_Value?);
-        Max = default(T_Value?);
+        Value = default;
+        Min = default;
+        Max = default;
         InvokeAsync(StateHasChanged);
     }
 
